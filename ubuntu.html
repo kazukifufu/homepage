@@ -41,7 +41,26 @@
                   sudo ufw allow ssh <br>
                   sudo ufw status <br>
             </pre>
-        <li>USBメモリーからの起動し、導入</li>
+        <li>RDPのセットアップ</li>
+        これまでは、オープンソースで開発されているxRDPを導入(24.04からの標準機能ではログインできなかった、深掘りはできていない)
+            - パッケージの導入
+        sudo apt update
+        sudo apt install xrdp
+    - 実行状況の確認
+        sudo systemctl status xrdp
+    - SSLキーの確認
+        ls -l /etc/ssl/private/ssl-cert-snakeoil.key
+    - xrdpユーザーをssl-certグループに追加
+        sudo adduser xrdp ssl-cert
+
+         設定画面のイメージ
+         tail -f /var/log/ufw.logで何がブロックされているか確認
+         ポート3389のオープンが必要
+         sudo ufw allow from 10.0.0.0/8 to any port 3389 proto tcp
+         sudo ufw allow xxxx
+        Microsoft Remote Desktopから接続した時に、ユーザーID・パスワード入力後 画面がブラックアウトするため、Ubuntuを再起動(再起動によりなぜ状況が改善するか未確認)
+        sudo shutdown -r now
+        <li>xxx</li>
       </ol>
     </p>
     <br>
