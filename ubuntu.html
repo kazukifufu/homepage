@@ -17,25 +17,27 @@
             </code>
           </pre>
         <li>sshサーバーの導入</li>
-        Ref: OpenSSH Server https://ubuntu.com/server/docs/openssh-server
-        - openssh-serverの導入
-          - パッケージの導入
-              sudo apt update
-              sudo apt install openssh-server
-          - 実行状況の確認
-              sudo systemctl status ssh
+          <pre>
+            Ref: OpenSSH Server https://ubuntu.com/server/docs/openssh-server
+            - openssh-serverの導入
+              - パッケージの導入
+                  sudo apt update
+                  sudo apt install openssh-server
+              - 実行状況の確認
+                  sudo systemctl status ssh
       
-              実行されていない場合は、自動実行の設定と手動起動
-                  sudo systemctl enable ssh
-                  sudo systemctl start ssh
-          - パスワードによる認証を可能にする
-              sudo vi /etc/ssh/sshd_config
-                  #PasswordAuthentication yes の行頭の#を削除し、保存する
-              sudo systemctl restart ssh
-          - Firewallの設定変更
-              sudo ufw enable
-              sudo ufw allow ssh
-              sudo ufw status
+                  実行されていない場合は、自動実行の設定と手動起動
+                      sudo systemctl enable ssh
+                      sudo systemctl start ssh
+              - パスワードによる認証を可能にする
+                  sudo vi /etc/ssh/sshd_config
+                      #PasswordAuthentication yes の行頭の#を削除し、保存する
+                  sudo systemctl restart ssh
+              - Firewallの設定変更
+                  sudo ufw enable
+                  sudo ufw allow ssh
+                  sudo ufw status
+            </pre>
         <li>USBメモリーからの起動し、導入</li>
       </ol>
     </p>
