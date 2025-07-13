@@ -17,6 +17,7 @@ summary: |
     - macOS Sequaia15.5 + Finder
   - iPhoneとの接続
     - Lightningケーブルを使用する
+
 -----
 ### 外部ディスクへバックアップを取得するための設定
   - Windows 11
