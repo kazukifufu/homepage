@@ -1,10 +1,10 @@
 ---
 title: iPhone（Lightning端子）のフルバックアップ方法
 cue: |
-  - 公式な方法
-  - フルバックアップ取得
-  - macOS Sequoia15.5とWindows 11を前提
-  - 写真・動画の参照可能
+  - 公式な方法<br>
+  - フルバックアップ取得<br>
+  - macOS Sequoia15.5とWindows 11を前提<br>
+  - 写真・動画の参照可能<br>
   - 外部ディスクへの取得
 summary: |
   - 不測の事態を想定し、フルバックアップの取得は必要である
