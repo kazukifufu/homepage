@@ -1,5 +1,4 @@
 ---
-layout: cornell
 title: iPhone（Lightning端子）のフルバックアップ方法
 cue: |
   - なぜバックアップが必要？

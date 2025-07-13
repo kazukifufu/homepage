@@ -1,6 +1,6 @@
 ---
 layout: default
-title: ノート一覧
+title: Table of Contents
 ---
 
 # 📚 ノート一覧
