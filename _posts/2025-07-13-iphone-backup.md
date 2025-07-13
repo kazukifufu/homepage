@@ -33,16 +33,37 @@ summary: |
       mv ~/Library/Application\ Support/MobileSync/Backup /Volumes/ExternalDrive/iPhoneBackup
 
       ls ~/Library/Application\ Support/MobileSync/
-      
+
       ln -s /Volumes/ExternalDrive/iPhoneBackup ~/Library/Application\ Support/MobileSync/Backup
       ```
+
 -----
+### バックアップ手順
+  - Windows 11
+    - LightningケーブルでiPhoneを接続
+    - iPhone側で「このコンピュータを信頼しますか？」のメッセージに対し「信頼」する
+    - iTunesを起動
+    - 「iPhoneのバックアップを暗号化」にもチェック
+    - 「今すぐバックアップ」をクリック
+  - macOS Sequaia15.5
+    - LightningケーブルでiPhoneを接続
+    - Finderのサイドバーから「iPhone」を選択
+    - 「バックアップ」セクションで「このMacにバックアップ」にチェック
+    - 「ローカルバックアップを暗号化」にもチェック
+    - 「今すぐバックアップ」をクリック
 
-### ステップ1：iTunesを使ったバックアップ手順
-xxxここに記事を書く
+-----
+### 写真・動画をバックアップ先で個別閲覧にする手順
+  - Windows11
+    - エクスプローラーで「Apple iPhone」フォルダーを開く
+    - Internal Storage → DCIM フォルダーに移動する
+    - 配下のフォルダーを全てを任意のディレクトリにコピーする
+  - macOS Sequaia15.5
+    - Finderで「iPhone」デバイスを開く
+    - 「内臓ストレージ」→ DCIMフォルダーに移動する
+    - 配下のフォルダーを全てを任意のフォルダーにコピーする
 
-### ステップ2：iCloudを使ったバックアップ手順
-xxx
-
-### 注意点
-xxx
+-----
+### リストア手順
+  - iPhoneをLightningケーブルで接続する
+  - iTunes/Finderから復元方法のリコメンドがある。これに従い復元する
