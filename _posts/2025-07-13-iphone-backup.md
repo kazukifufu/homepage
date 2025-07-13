@@ -13,7 +13,9 @@ summary: |
   - OSと使用するツール
     - Windows 11 + iTunes
     - macOS Sequaia15.5 + Finder
----
+
+-----
+
 ### ステップ1：iTunesを使ったバックアップ手順
 xxxここに記事を書く
 
