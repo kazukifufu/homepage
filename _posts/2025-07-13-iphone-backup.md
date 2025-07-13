@@ -13,9 +13,19 @@ summary: |
 -----
 ### 前提
   - OSと使用するツール
-    - Windows 11 + iTunes
+    - Windows 11 + iTunes(別途導入が必要)
     - macOS Sequaia15.5 + Finder
-
+  - iPhoneとの接続
+    - Lightningケーブルを使用する
+-----
+### 外部ディスクへバックアップを取得するための設定
+  - Windows 11
+    - iTunesのバックアップフォルダを外部ディクスに移動する(下記の例は、"E:\iPhoneBackup")
+    - 移動後にiTunesのバックアップフォルダを外部ディスクにするためのシンボリックリンクを作成する
+      ```
+      mklink /J "C:\Users\<ユーザー名>\AppData\Roaming\Apple Computer\MobileSync\Backup" "E:\iPhoneBackup"
+      ```
+  - macOS Sequaia15.5
 -----
 
 ### ステップ1：iTunesを使ったバックアップ手順
