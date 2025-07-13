@@ -1,0 +1,42 @@
+body {
+  font-family: sans-serif;
+  margin: 2em;
+  background-color: #fdfdfd;
+}
+
+.cornell-note {
+  display: grid;
+  grid-template-columns: 25% 1fr;
+  grid-template-rows: auto 150px;
+  grid-template-areas:
+    "cue notes"
+    "summary summary";
+  gap: 1em;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.cue {
+  grid-area: cue;
+  background: #f1f1f1;
+  padding: 1em;
+  border: 1px solid #ccc;
+}
+
+.notes {
+  grid-area: notes;
+  background: #ffffff;
+  padding: 1em;
+  border: 1px solid #ccc;
+}
+
+.summary {
+  grid-area: summary;
+  background: #eaf8e6;
+  padding: 1em;
+  border: 1px solid #ccc;
+}
+
+h1 {
+  text-align: center;
+}
