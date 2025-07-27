@@ -3,3 +3,4 @@
 - [天気情報の収集方法](./Projects/weather/How to gather weather related information daily.md)
 
 - [test1.md](test1.md)
+- [test2.md](test2.md)
