@@ -4,3 +4,5 @@
 
 - [test1.md](test1.md)
 - [test2.md](test2.md)
+- [test3.md](./Projects/test3.md)
+- [test4.md](./Projects/weather/test4.md)
