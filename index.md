@@ -9,4 +9,7 @@
 <br>
 #### Prompt Engineering
   - []()
-
+---
+### Hints&Tips
+#### Linux related
+  - [🧰 よく使うコマンド]()
