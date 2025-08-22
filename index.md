@@ -9,7 +9,9 @@
 <br>
 #### Prompt Engineering
   - []()
+
 ---
+
 ### Hints&Tips
 #### Linux related
-  - [🧰 よく使うコマンド]()
+  - [🧰 よく使うコマンド集 随時アップデート]()
