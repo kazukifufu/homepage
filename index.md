@@ -15,4 +15,4 @@
 ### Hints&Tips
 #### Linux related
   - [🧰 よく使うコマンド集 随時アップデート](./hints_tips/linux/よく使うコマンド集.md)
-  - [🛠 トラブル対応](./hints_tips/linux/トラブル対応.md)
+  - [🛠 トラブル対応集](./hints_tips/linux/トラブル対応集.md)
