@@ -1,5 +1,8 @@
-### **`apt install` と `apt-get install`の違いと使い分け**
+[作成日: 2025/12/27　更新日: 2025/12/27]
+# **`apt install` と `apt-get install`の違いと使い分け**
 
+---
+## はじめに
 Linux（Debian/Ubuntu系）でパッケージをインストールする際、`apt install` と `apt-get install` のどちらを使うべきか迷うことがあります。
 **「普段の操作（手動入力）なら `apt`、スクリプト作成なら `apt-get`」**を使うのが現在の標準的な使い分けです。主な違いを整理してみます。
 
