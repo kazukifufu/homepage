@@ -1,0 +1,2 @@
+- `apt install` と `apt-get install`の違いについて
+- 
