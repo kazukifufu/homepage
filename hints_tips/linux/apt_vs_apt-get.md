@@ -1,5 +1,5 @@
 [作成日: 2025/12/27　更新日: 2025/12/27]
-# **`apt install` と `apt-get install`の違いと使い分け**
+# **💻 `apt install` と `apt-get install`の違いと使い分け**
 
 ---
 ## はじめに
