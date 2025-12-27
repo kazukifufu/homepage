@@ -17,4 +17,4 @@
   - [🧰 よく使うコマンド集 随時アップデート](./hints_tips/linux/よく使うコマンド集.md)
   - [🛠 トラブル対応集](./hints_tips/linux/トラブル対応集.md)
   - Tips
-    - [xxx](./hints_tips/linux/apt_vs_apt-get.md) 
+    - [apt install と apt-get installの違いと使い分け](./hints_tips/linux/apt_vs_apt-get.md) 
