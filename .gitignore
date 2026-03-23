@@ -1,0 +1,5 @@
+.DS_Store
+calendar_memo_schedule_app.db
+__pycache__/
+*.pyc
+*.pyo
