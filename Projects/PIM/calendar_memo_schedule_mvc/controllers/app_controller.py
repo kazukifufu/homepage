@@ -8,7 +8,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime, date
 
-from models.database import init_databases
+from models.database import init_db
 from models.note_model import NoteModel
 from models.schedule_model import ScheduleModel
 from views.main_view import MainView
@@ -26,7 +26,7 @@ class AppController:
         self.root = root
 
         # ── モデル初期化 ─────────────────────────────────────────────
-        init_databases()
+        init_db()
         self._note_model = NoteModel()
         self._schedule_model = ScheduleModel()
 
