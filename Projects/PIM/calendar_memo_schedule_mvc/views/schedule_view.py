@@ -3,26 +3,41 @@
 """
 
 import tkinter as tk
+from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Callable
 from config import HOUR_HEIGHT, START_HOUR, END_HOUR, TIME_AXIS_WIDTH
 
 
+@dataclass
+class TaskBarParams:
+    """タスクバー描画に必要なパラメータ。"""
+
+    base_x: float
+    y_s: float
+    y_e: float
+    task_name: str
+    clr: str
+    col_w: float
+    mode: str
+
+
 class ScheduleView:
-    """
-    スケジュールセクションのウィジェット管理と描画を行うクラス。
+    """スケジュールセクションのウィジェット管理と描画を行うクラス。
+
     描画データはコントローラから受け取る（DBアクセスなし）。
     """
 
-    def __init__(self, parent, colors: dict):
-        """
-        :param parent: 親ウィジェット（右ペインフレーム）
-        :param colors: テーマカラー辞書
+    def __init__(self, parent: tk.Widget, colors: dict[str, str]) -> None:
+        """スケジュール表示エリアのウィジェットを初期化する。
+
+        Args:
+            parent: 親ウィジェット（右ペインフレーム）。
+            colors: テーマカラー辞書。
         """
         self.colors = colors
         self.canvas: tk.Canvas | None = None
 
-        # コンテナ
         self.container = tk.Frame(parent)
         self.container.pack(fill=tk.BOTH, expand=True)
 
@@ -30,63 +45,84 @@ class ScheduleView:
         header = tk.Frame(self.container, bg=colors["frame_bg"], pady=5)
         header.pack(fill=tk.X)
 
-        # モード切替ボタン行
         mode_row = tk.Frame(header, bg=colors["frame_bg"])
         mode_row.pack(side=tk.TOP, pady=2)
 
         self._daily_btn = tk.Label(
-            mode_row, text="Daily (日次)", font=("Arial", 10), width=12,
-            bg=colors["button_bg"], fg=colors["button_fg"],
-            cursor="hand2", padx=5, pady=2,
-            highlightthickness=0, highlightbackground=colors["button_fg"]
+            mode_row,
+            text="Daily (日次)",
+            font=("Arial", 10),
+            width=12,
+            bg=colors["button_bg"],
+            fg=colors["button_fg"],
+            cursor="hand2",
+            padx=5,
+            pady=2,
+            highlightthickness=0,
+            highlightbackground=colors["button_fg"],
         )
         self._daily_btn.pack(side=tk.LEFT, padx=5)
 
         self._weekly_btn = tk.Label(
-            mode_row, text="Weekly (週次)", font=("Arial", 10), width=12,
-            bg=colors["button_bg"], fg=colors["button_fg"],
-            cursor="hand2", padx=5, pady=2,
-            highlightthickness=0, highlightbackground=colors["button_fg"]
+            mode_row,
+            text="Weekly (週次)",
+            font=("Arial", 10),
+            width=12,
+            bg=colors["button_bg"],
+            fg=colors["button_fg"],
+            cursor="hand2",
+            padx=5,
+            pady=2,
+            highlightthickness=0,
+            highlightbackground=colors["button_fg"],
         )
         self._weekly_btn.pack(side=tk.LEFT, padx=5)
 
-        # 日付表示行
         upper_row = tk.Frame(header, bg=colors["frame_bg"])
         upper_row.pack(fill=tk.X, padx=10, pady=5)
 
         self._date_label = tk.Label(
-            upper_row, text="", font=("Arial", 10),
-            bg=colors["button_bg"], fg=colors["button_fg"],
-            padx=5, pady=2, highlightthickness=0,
-            highlightbackground=colors["button_fg"]
+            upper_row,
+            text="",
+            font=("Arial", 10),
+            bg=colors["button_bg"],
+            fg=colors["button_fg"],
+            padx=5,
+            pady=2,
+            highlightthickness=0,
+            highlightbackground=colors["button_fg"],
         )
         self._date_label.pack(expand=True)
 
-        # 操作ボタン行（モード切替で内容が変わる）
         self._action_row = tk.Frame(header, bg=colors["frame_bg"])
         self._action_row.pack()
 
     # ── コールバック登録 ─────────────────────────────────────────────
 
-    def bind_daily(self, callback: Callable) -> None:
+    def bind_daily(self, callback: Callable[[str], None]) -> None:
         """「Daily」ボタンクリック時のコールバックを登録する。"""
         self._daily_btn.bind("<Button-1>", lambda e: callback("daily"))
 
-    def bind_weekly(self, callback: Callable) -> None:
+    def bind_weekly(self, callback: Callable[[str], None]) -> None:
         """「Weekly」ボタンクリック時のコールバックを登録する。"""
         self._weekly_btn.bind("<Button-1>", lambda e: callback("weekly"))
 
     # ── ウィジェット構築 ─────────────────────────────────────────────
 
     def create_canvas(self) -> tk.Canvas:
-        """
-        スクロール対応のスケジュールキャンバスを生成して返す。
-        :return: 生成した Canvas ウィジェット
+        """スクロール対応のスケジュールキャンバスを生成して返す。
+
+        Returns:
+            生成した Canvas ウィジェット。
         """
         wrapper = tk.Frame(self.container)
         wrapper.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-        self.canvas = tk.Canvas(wrapper, bg=self.colors["frame_bg"], highlightthickness=0)
+        self.canvas = tk.Canvas(
+            wrapper,
+            bg=self.colors["frame_bg"],
+            highlightthickness=0,
+        )
         scrollbar = tk.Scrollbar(wrapper, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=scrollbar.set)
 
@@ -99,7 +135,7 @@ class ScheduleView:
         # マウスホイールスクロール（Windows / macOS 対応）
         self.canvas.bind(
             "<MouseWheel>",
-            lambda e: self.canvas.yview_scroll(int("-1" if e.delta > 0 else "1"), "units")
+            lambda e: self.canvas.yview_scroll(-1 if e.delta > 0 else 1, "units"),
         )
         return self.canvas
 
@@ -110,14 +146,15 @@ class ScheduleView:
     def update_action_buttons(
         self,
         mode: str,
-        on_add: Callable,
-        on_edit: Callable
+        on_add: Callable[[str], None],
+        on_edit: Callable[[str], None],
     ) -> None:
-        """
-        モードに応じて操作ボタン行を再構築する。
-        :param mode: "daily" または "weekly"
-        :param on_add: 追加ボタンのコールバック (category: str) -> None
-        :param on_edit: 更新/削除ボタンのコールバック (category: str) -> None
+        """モードに応じて操作ボタン行を再構築する。
+
+        Args:
+            mode: "daily" または "weekly"。
+            on_add: 追加ボタンのコールバック。
+            on_edit: 更新/削除ボタンのコールバック。
         """
         for widget in self._action_row.winfo_children():
             widget.destroy()
@@ -132,19 +169,33 @@ class ScheduleView:
                 frame.grid(row=0, column=col, padx=10)
 
                 add_btn = tk.Label(
-                    frame, text=f"{label}を追加", font=("Arial", 10), width=15,
-                    bg=clr, fg=self.colors.get("button_fg", "white"),
-                    cursor="hand2", padx=5, pady=2,
-                    highlightthickness=0, highlightbackground=self.colors.get("button_fg", "white")
+                    frame,
+                    text=f"{label}を追加",
+                    font=("Arial", 10),
+                    width=15,
+                    bg=clr,
+                    fg=self.colors["button_fg"],
+                    cursor="hand2",
+                    padx=5,
+                    pady=2,
+                    highlightthickness=0,
+                    highlightbackground=self.colors["button_fg"],
                 )
                 add_btn.bind("<Button-1>", lambda e, c=cat: on_add(c))
                 add_btn.pack(pady=2)
 
                 edit_btn = tk.Label(
-                    frame, text=f"{label}を更新/削除", font=("Arial", 10), width=15,
-                    bg=clr, fg=self.colors.get("button_fg", "white"),
-                    cursor="hand2", padx=5, pady=2,
-                    highlightthickness=0, highlightbackground=self.colors.get("button_fg", "white")
+                    frame,
+                    text=f"{label}を更新/削除",
+                    font=("Arial", 10),
+                    width=15,
+                    bg=clr,
+                    fg=self.colors["button_fg"],
+                    cursor="hand2",
+                    padx=5,
+                    pady=2,
+                    highlightthickness=0,
+                    highlightbackground=self.colors["button_fg"],
                 )
                 edit_btn.bind("<Button-1>", lambda e, c=cat: on_edit(c))
                 edit_btn.pack(pady=1)
@@ -153,26 +204,26 @@ class ScheduleView:
                 self._action_row,
                 text="※週次モード：予定のみを表示します",
                 fg=self.colors["button_fg"],
-                bg=self.colors["button_bg"]
+                bg=self.colors["button_bg"],
             ).pack()
 
     # ── スケジュール描画 ─────────────────────────────────────────────
 
     def draw(
         self,
-        schedule_cache: dict,
+        schedule_cache: dict[str, list[tuple]],
         mode: str,
-        selected_date: date
+        selected_date: date,
     ) -> None:
-        """
-        キャッシュデータをもとにスケジュールを描画する（DB接続なし）。
-        :param schedule_cache: { "YYYY-MM-DD": [(...), ...] } のキャッシュ
-        :param mode: "daily" または "weekly"
-        :param selected_date: 選択中の日付
+        """キャッシュデータをもとにスケジュールを描画する（DB接続なし）。
+
+        Args:
+            schedule_cache: {"YYYY-MM-DD": [(...), ...]} 形式のキャッシュ。
+            mode: "daily" または "weekly"。
+            selected_date: 選択中の日付。
         """
         canv = self.canvas
         canv.delete("all")
-
         width = canv.winfo_width()
         if width < 100:
             width = 800
@@ -196,71 +247,136 @@ class ScheduleView:
         col_w = (width - TIME_AXIS_WIDTH - 20) / num_cols
         col_h = 20 + 24 * HOUR_HEIGHT
 
-        # 1. 時間軸グリッド
+        self._draw_time_grid(canv, width)
+        self._draw_col_headers(canv, num_cols, col_labels, col_w, col_h)
+        self._draw_tasks(canv, schedule_cache, mode, selected_date, col_w)
+
+    def _draw_time_grid(self, canv: tk.Canvas, width: int) -> None:
+        """時間軸グリッドを描画する。"""
         for h in range(START_HOUR, END_HOUR + 1):
             y = 20 + (h - START_HOUR) * HOUR_HEIGHT
             canv.create_text(
                 TIME_AXIS_WIDTH - 10, y,
                 text=f"{h:02d}:00", anchor="e",
-                font=("Arial", 9), fill=self.colors["frame_fg"]
+                font=("Arial", 9), fill=self.colors["frame_fg"],
             )
-            canv.create_line(TIME_AXIS_WIDTH, y, width - 20, y, fill=self.colors["frame_fg"])
+            canv.create_line(
+                TIME_AXIS_WIDTH, y, width - 20, y, fill=self.colors["frame_fg"]
+            )
 
-        # 2. 列見出しと境界線
+    def _draw_col_headers(
+        self,
+        canv: tk.Canvas,
+        num_cols: int,
+        col_labels: list[str],
+        col_w: float,
+        col_h: float,
+    ) -> None:
+        """列見出しと境界線を描画する。"""
         for i in range(num_cols):
             x_left = TIME_AXIS_WIDTH + (i * col_w)
             canv.create_text(
                 x_left + col_w / 2, 10,
                 text=col_labels[i], font=("Arial", 8, "bold"),
-                fill=self.colors["frame_fg"]
+                fill=self.colors["frame_fg"],
             )
             if i > 0:
-                canv.create_line(x_left, 0, x_left, col_h + 20, fill=self.colors["frame_fg"])
+                canv.create_line(
+                    x_left, 0, x_left, col_h + 20, fill=self.colors["frame_fg"]
+                )
 
-        # 3. タスクバー描画
-        if mode == "daily":
-            d_str = str(selected_date)
-            for cat, s_time, e_time, t_name in schedule_cache.get(d_str, []):
-                y_s = self._time_to_y(s_time)
-                y_e = self._time_to_y(e_time)
-                base_x = TIME_AXIS_WIDTH if cat == "plan" else TIME_AXIS_WIDTH + col_w
-                clr = self.colors["schedule_plan"] if cat == "plan" else self.colors["schedule_actual"]
-                self._draw_task_bar(canv, base_x, y_s, y_e, t_name, clr, col_w, mode)
-        else:
-            offset = (selected_date.weekday() + 1) % 7
-            week_start = selected_date - timedelta(days=offset)
-            for i in range(7):
-                curr = str(week_start + timedelta(days=i))
-                base_x = TIME_AXIS_WIDTH + (i * col_w)
-                for s_time, e_time, t_name in schedule_cache.get(curr, []):
-                    y_s = self._time_to_y(s_time)
-                    y_e = self._time_to_y(e_time)
-                    self._draw_task_bar(
-                        canv, base_x, y_s, y_e, t_name,
-                        self.colors["schedule_plan"], col_w, mode
-                    )
-
-    def _draw_task_bar(
+    def _draw_tasks(
         self,
         canv: tk.Canvas,
-        base_x: float, y_s: float, y_e: float,
-        task_name: str, clr: str, col_w: float, mode: str
+        schedule_cache: dict[str, list[tuple]],
+        mode: str,
+        selected_date: date,
+        col_w: float,
     ) -> None:
+        """モードに応じてタスクバーを描画する。"""
+        if mode == "daily":
+            self._draw_daily_tasks(canv, schedule_cache, selected_date, col_w)
+        else:
+            self._draw_weekly_tasks(canv, schedule_cache, selected_date, col_w)
+
+    def _draw_daily_tasks(
+        self,
+        canv: tk.Canvas,
+        schedule_cache: dict[str, list[tuple]],
+        selected_date: date,
+        col_w: float,
+    ) -> None:
+        """日次モードのタスクバーを描画する。"""
+        d_str = str(selected_date)
+        for cat, s_time, e_time, t_name in schedule_cache.get(d_str, []):
+            base_x = TIME_AXIS_WIDTH if cat == "plan" else TIME_AXIS_WIDTH + col_w
+            clr = (
+                self.colors["schedule_plan"]
+                if cat == "plan"
+                else self.colors["schedule_actual"]
+            )
+            self._draw_task_bar(
+                canv,
+                TaskBarParams(
+                    base_x=base_x,
+                    y_s=self._time_to_y(s_time),
+                    y_e=self._time_to_y(e_time),
+                    task_name=t_name,
+                    clr=clr,
+                    col_w=col_w,
+                    mode="daily",
+                ),
+            )
+
+    def _draw_weekly_tasks(
+        self,
+        canv: tk.Canvas,
+        schedule_cache: dict[str, list[tuple]],
+        selected_date: date,
+        col_w: float,
+    ) -> None:
+        """週次モードのタスクバーを描画する。"""
+        offset = (selected_date.weekday() + 1) % 7
+        week_start = selected_date - timedelta(days=offset)
+        for i in range(7):
+            curr = str(week_start + timedelta(days=i))
+            base_x = TIME_AXIS_WIDTH + (i * col_w)
+            for s_time, e_time, t_name in schedule_cache.get(curr, []):
+                self._draw_task_bar(
+                    canv,
+                    TaskBarParams(
+                        base_x=base_x,
+                        y_s=self._time_to_y(s_time),
+                        y_e=self._time_to_y(e_time),
+                        task_name=t_name,
+                        clr=self.colors["schedule_plan"],
+                        col_w=col_w,
+                        mode="weekly",
+                    ),
+                )
+
+    def _draw_task_bar(self, canv: tk.Canvas, params: TaskBarParams) -> None:
         """タスクを矢印線＋テキストで描画するヘルパー。"""
-        line_x = base_x + 15
-        canv.create_line(line_x, y_s, line_x, y_e, arrow=tk.BOTH, width=4, fill=clr)
-
+        line_x = params.base_x + 15
+        canv.create_line(
+            line_x, params.y_s, line_x, params.y_e,
+            arrow=tk.BOTH, width=4, fill=params.clr,
+        )
         text_x = line_x + 10
-        text_y = (y_s + y_e) / 2
+        text_y = (params.y_s + params.y_e) / 2
 
-        # 週次モードで列幅が狭い場合はテキストを省略
-        display_text = task_name
-        if mode == "weekly" and col_w < 70:
-            display_text = task_name[:4] + ".." if len(task_name) > 4 else task_name
+        display_text = params.task_name
+        if params.mode == "weekly" and params.col_w < 70:
+            display_text = (
+                params.task_name[:4] + ".."
+                if len(params.task_name) > 4
+                else params.task_name
+            )
 
         canv.create_text(
-            text_x, text_y, text=display_text,
-            anchor="w", font=("Arial", 9, "bold"), fill=clr
+            text_x, text_y,
+            text=display_text, anchor="w",
+            font=("Arial", 9, "bold"), fill=params.clr,
         )
 
     def _time_to_y(self, t_str: str) -> float:

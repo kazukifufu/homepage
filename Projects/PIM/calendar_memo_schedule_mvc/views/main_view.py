@@ -12,15 +12,17 @@ from views.schedule_view import ScheduleView
 
 
 class MainView:
-    """
-    アプリケーション全体のウィンドウレイアウトを管理するクラス。
+    """アプリケーション全体のウィンドウレイアウトを管理するクラス。
+
     CalendarView / NoteView / ScheduleView の親として機能する。
     """
 
-    def __init__(self, root: tk.Tk, colors: dict):
-        """
-        :param root: Tkinter ルートウィンドウ
-        :param colors: テーマカラー辞書
+    def __init__(self, root: tk.Tk, colors: dict[str, str]) -> None:
+        """メインウィンドウのレイアウトを構築する。
+
+        Args:
+            root: Tkinter ルートウィンドウ。
+            colors: テーマカラー辞書。
         """
         root.title(APP_NAME)
         root.geometry(WIN_SIZE)
@@ -42,6 +44,7 @@ class MainView:
         pw_vertical_left.add(self.note_view.container, weight=1)
 
         # ── 右側: スケジュールView ───────────────────────────────────
+        # ScheduleView のコンテナとして右ペインを用意（背景色を統一）
         frame_right = tk.Frame(pw_horizontal, bg=colors["frame_bg"])
         pw_horizontal.add(frame_right, weight=1)
 

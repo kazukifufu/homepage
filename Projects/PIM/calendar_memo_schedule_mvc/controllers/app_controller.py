@@ -5,6 +5,7 @@ ModelとViewの橋渡し役。
 
 import sys
 import tkinter as tk
+from dataclasses import dataclass, field
 from tkinter import ttk, messagebox
 from datetime import datetime, date
 
@@ -14,14 +15,33 @@ from models.schedule_model import ScheduleModel
 from views.main_view import MainView
 
 
-class AppController:
-    """
-    全ドメインロジック・状態管理・イベントハンドリングを集約するクラス。
-    """
+@dataclass
+class AppState:
+    """アプリケーションの表示状態を管理するデータクラス。"""
 
-    def __init__(self, root: tk.Tk):
-        """
-        :param root: Tkinter ルートウィンドウ
+    current_year: int = field(default_factory=lambda: datetime.now().year)
+    current_month: int = field(default_factory=lambda: datetime.now().month)
+    selected_date: date = field(default_factory=lambda: datetime.now().date())
+    schedule_mode: str = "daily"
+
+
+@dataclass
+class ScheduleEntries:
+    """スケジュールダイアログの入力フィールド群。"""
+
+    s_entry: tk.Entry
+    e_entry: tk.Entry
+    t_entry: tk.Entry
+
+
+class AppController:
+    """全ドメインロジック・状態管理・イベントハンドリングを集約するクラス。"""
+
+    def __init__(self, root: tk.Tk) -> None:
+        """アプリケーションのモデル・ビュー・コントローラを初期化する。
+
+        Args:
+            root: Tkinter ルートウィンドウ。
         """
         self.root = root
 
@@ -31,10 +51,7 @@ class AppController:
         self._schedule_model = ScheduleModel()
 
         # ── アプリケーション状態 ──────────────────────────────────────
-        self._current_year: int = datetime.now().year
-        self._current_month: int = datetime.now().month
-        self._selected_date: date = datetime.now().date()
-        self._schedule_mode: str = "daily"
+        self._state = AppState()
 
         # ── View 構築 ────────────────────────────────────────────────
         colors = self._build_colors()
@@ -59,23 +76,23 @@ class AppController:
             "<Configure>",
             lambda e: sched.draw(
                 self._schedule_model.cache,
-                self._schedule_mode,
-                self._selected_date
-            )
+                self._state.schedule_mode,
+                self._state.selected_date,
+            ),
         )
 
         # ── 初期表示 ─────────────────────────────────────────────────
         cal.render(
-            self._current_year, self._current_month,
-            self._selected_date, self._on_date_click
+            self._state.current_year, self._state.current_month,
+            self._state.selected_date, self._on_date_click,
         )
-        note.set_date(self._format_date(self._selected_date))
+        note.set_date(self._format_date(self._state.selected_date))
         self._on_toggle_mode("daily")
         self._load_note()
 
     # ── テーマカラー ─────────────────────────────────────────────────
 
-    def _build_colors(self) -> dict:
+    def _build_colors(self) -> dict[str, str]:
         """コマンドライン引数を参照してテーマカラー辞書を生成する。"""
         is_dark = len(sys.argv) > 1 and sys.argv[1].lower() == "dark"
         if is_dark:
@@ -108,32 +125,32 @@ class AppController:
 
     def _on_prev_month(self) -> None:
         """前月へ移動する。"""
-        if self._current_month == 1:
-            self._current_month = 12
-            self._current_year -= 1
+        if self._state.current_month == 1:
+            self._state.current_month = 12
+            self._state.current_year -= 1
         else:
-            self._current_month -= 1
+            self._state.current_month -= 1
         self._refresh_calendar()
 
     def _on_next_month(self) -> None:
         """翌月へ移動する。"""
-        if self._current_month == 12:
-            self._current_month = 1
-            self._current_year += 1
+        if self._state.current_month == 12:
+            self._state.current_month = 1
+            self._state.current_year += 1
         else:
-            self._current_month += 1
+            self._state.current_month += 1
         self._refresh_calendar()
 
     def _refresh_calendar(self) -> None:
         """カレンダーグリッドを再描画する。"""
         self._view.calendar_view.render(
-            self._current_year, self._current_month,
-            self._selected_date, self._on_date_click
+            self._state.current_year, self._state.current_month,
+            self._state.selected_date, self._on_date_click,
         )
 
     def _on_date_click(self, clicked_date: date, holiday_name: str) -> None:
         """日付セルがクリックされたときの処理。"""
-        self._selected_date = clicked_date
+        self._state.selected_date = clicked_date
         note = self._view.note_view
         note.set_date(self._format_date(clicked_date))
         note.set_holiday(holiday_name)
@@ -148,9 +165,9 @@ class AppController:
 
     def _load_note(self) -> None:
         """選択日のメモをDBから読み込んでノートViewに反映する。"""
-        d_str = self._selected_date.strftime("%Y-%m-%d")
+        d_str = self._state.selected_date.strftime("%Y-%m-%d")
         note = self._view.note_view
-        note.set_date(self._format_date(self._selected_date))
+        note.set_date(self._format_date(self._state.selected_date))
 
         data = self._note_model.load(d_str)
         if data:
@@ -162,7 +179,7 @@ class AppController:
         """メモを保存する。テキストが空の場合はDBから削除する。"""
         note = self._view.note_view
         text = note.get_text()
-        d_str = self._selected_date.strftime("%Y-%m-%d")
+        d_str = self._state.selected_date.strftime("%Y-%m-%d")
 
         if not text.strip() or note.is_showing_placeholder():
             self._note_model.delete(d_str)
@@ -186,7 +203,7 @@ class AppController:
 
     def _on_toggle_mode(self, mode: str) -> None:
         """日次 / 週次モードを切り替える。"""
-        self._schedule_mode = mode
+        self._state.schedule_mode = mode
         self._reload_schedule()
         self._view.schedule_view.update_action_buttons(
             mode,
@@ -196,16 +213,20 @@ class AppController:
 
     def _reload_schedule(self) -> None:
         """スケジュールデータを再読み込みし、キャンバスを再描画する。"""
-        self._schedule_model.load(self._selected_date, self._schedule_mode)
+        self._schedule_model.load(self._state.selected_date, self._state.schedule_mode)
         sched = self._view.schedule_view
         if sched.canvas is not None:
-            sched.draw(self._schedule_model.cache, self._schedule_mode, self._selected_date)
+            sched.draw(
+                self._schedule_model.cache,
+                self._state.schedule_mode,
+                self._state.selected_date,
+            )
 
     def _on_open_schedule_dialog(
         self,
         category: str,
-        edit_id=None,
-        initial_data: dict | None = None
+        edit_id: int | None = None,
+        initial_data: dict | None = None,
     ) -> None:
         """スケジュール入力ダイアログを開く（新規追加 / 編集共通）。"""
         dialog = tk.Toplevel(self.root)
@@ -214,34 +235,58 @@ class AppController:
         dialog.grab_set()
 
         data = initial_data or {}
-        s_entry = self._make_labeled_entry(dialog, "開始:", data.get("s", "09:00"))
-        e_entry = self._make_labeled_entry(dialog, "終了:", data.get("e", "10:00"))
-        t_entry = self._make_labeled_entry(dialog, "内容:", data.get("t", ""), width=30)
+        entries = ScheduleEntries(
+            s_entry=self._make_labeled_entry(dialog, "開始:", data.get("s", "09:00")),
+            e_entry=self._make_labeled_entry(dialog, "終了:", data.get("e", "10:00")),
+            t_entry=self._make_labeled_entry(dialog, "内容:", data.get("t", ""), width=30),
+        )
+        tk.Label(dialog, text=f"日付: {self._state.selected_date}").pack(pady=5)
 
-        tk.Label(dialog, text=f"日付: {self._selected_date}").pack(pady=5)
+        tk.Button(
+            dialog,
+            text="保存",
+            command=lambda: self._save_schedule(
+                dialog, category, edit_id, data, entries
+            ),
+            width=15,
+        ).pack(pady=20)
 
-        def _save():
-            s, e, t = s_entry.get(), e_entry.get(), t_entry.get()
-            try:
-                if datetime.strptime(e, "%H:%M") <= datetime.strptime(s, "%H:%M"):
-                    messagebox.showerror("エラー", "時刻順序が不正です")
-                    return
-            except ValueError:
-                messagebox.showerror("エラー", "時刻の形式が不正です（HH:MM）")
+    def _save_schedule(
+        self,
+        dialog: tk.Toplevel,
+        category: str,
+        edit_id: int | None,
+        data: dict,
+        entries: ScheduleEntries,
+    ) -> None:
+        """スケジュールダイアログの保存処理。
+
+        Args:
+            dialog: 閉じる対象のダイアログ。
+            category: イベントカテゴリ（"plan" または "actual"）。
+            edit_id: 編集対象のイベントID。新規の場合は None。
+            data: ダイアログの初期データ（callback を含む場合がある）。
+            entries: ダイアログの入力フィールド群。
+        """
+        s, e, t = entries.s_entry.get(), entries.e_entry.get(), entries.t_entry.get()
+        try:
+            if datetime.strptime(e, "%H:%M") <= datetime.strptime(s, "%H:%M"):
+                messagebox.showerror("エラー", "時刻順序が不正です")
                 return
+        except ValueError:
+            messagebox.showerror("エラー", "時刻の形式が不正です（HH:MM）")
+            return
 
-            d_str = str(self._selected_date)
-            if edit_id:
-                self._schedule_model.update(edit_id, s, e, t)
-            else:
-                self._schedule_model.save(d_str, category, s, e, t)
+        d_str = str(self._state.selected_date)
+        if edit_id:
+            self._schedule_model.update(edit_id, s, e, t)
+        else:
+            self._schedule_model.save(d_str, category, s, e, t)
 
-            self._reload_schedule()
-            dialog.destroy()
-            if "callback" in data:
-                data["callback"]()
-
-        tk.Button(dialog, text="保存", command=_save, width=15).pack(pady=20)
+        self._reload_schedule()
+        dialog.destroy()
+        if "callback" in data:
+            data["callback"]()
 
     def _on_show_registered_tasks(self, category: str) -> None:
         """登録済みタスクの一覧ダイアログを表示する。"""
@@ -258,7 +303,7 @@ class AppController:
         def refresh():
             tree.delete(*tree.get_children())
             for row in self._schedule_model.get_events_for_category(
-                str(self._selected_date), category
+                str(self._state.selected_date), category
             ):
                 tree.insert("", tk.END, values=row)
 
@@ -300,7 +345,7 @@ class AppController:
         parent: tk.Widget,
         label: str,
         value: str,
-        width: int = 20
+        width: int = 20,
     ) -> tk.Entry:
         """ラベル付き入力フィールドを生成して Entry を返す。"""
         tk.Label(parent, text=label).pack()
