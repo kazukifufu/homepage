@@ -1,0 +1,4 @@
+[DESIGN]
+max-args=6
+max-positional-arguments=6
+min-public-methods=0
