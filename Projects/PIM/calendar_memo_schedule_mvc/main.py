@@ -19,6 +19,9 @@ def main() -> None:
     """アプリケーションを起動する。"""
     root = tk.Tk()
     AppController(root)
+    # ウィンドウを一度描画確定させてからイベントループへ移行する。
+    # これにより after() コールバック内で winfo_width() が正しい値を返す。
+    root.update_idletasks()
     root.mainloop()
 
 
