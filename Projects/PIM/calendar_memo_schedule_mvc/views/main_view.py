@@ -5,10 +5,16 @@
 
 import tkinter as tk
 from tkinter import ttk
-from config import APP_NAME, WIN_SIZE
+from config import APP_NAME, WIN_SIZE, WIN_WIDTH, WIN_HEIGHT
 from views.calendar_view import CalendarView
 from views.note_view import NoteView
 from views.schedule_view import ScheduleView
+
+# 起動直後のサッシ位置（スクリーンショットの比率に合わせた初期値）
+# 左右分割：左ペイン幅 ≒ ウィンドウ幅の 37.5 %
+_HORIZONTAL_RATIO: float = 0.375
+# 左側上下分割：カレンダー高さ ≒ ウィンドウ高さの 47.5 %
+_VERTICAL_RATIO: float = 0.475
 
 
 class MainView:
@@ -49,3 +55,19 @@ class MainView:
         pw_horizontal.add(frame_right, weight=1)
 
         self.schedule_view = ScheduleView(frame_right, colors)
+
+        # ── 起動直後のサッシ位置をスクリーンショットの比率に合わせて設定 ──
+        # config の定数をベースに目標ピクセルを算出し、ウィンドウが実際に
+        # 描画されるまでリトライしながら適用する。
+        _target_h_sash = int(WIN_WIDTH  * _HORIZONTAL_RATIO)  # 左右サッシ位置
+        _target_v_sash = int(WIN_HEIGHT * _VERTICAL_RATIO)    # 上下サッシ位置
+
+        def _apply_sash() -> None:
+            # ウィンドウが描画されていなければ再試行
+            if root.winfo_width() <= 1:
+                root.after(100, _apply_sash)
+                return
+            pw_horizontal.sashpos(0, _target_h_sash)
+            pw_vertical_left.sashpos(0, _target_v_sash)
+
+        root.after(50, _apply_sash)
