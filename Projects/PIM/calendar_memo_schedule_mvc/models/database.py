@@ -31,3 +31,25 @@ def init_db() -> None:
                 task_name  TEXT     NOT NULL
             )
         """))
+
+        # 一週間コンパス用テーブル（週の開始日＝日曜日をキーとする）
+        conn.execute(textwrap.dedent("""\
+            CREATE TABLE IF NOT EXISTS compass_roles (
+                week_start        TEXT PRIMARY KEY,
+                sharpen_body      TEXT NOT NULL DEFAULT '',
+                sharpen_social    TEXT NOT NULL DEFAULT '',
+                sharpen_intellect TEXT NOT NULL DEFAULT '',
+                sharpen_spirit    TEXT NOT NULL DEFAULT '',
+                role1_name        TEXT NOT NULL DEFAULT '',
+                role1_goal        TEXT NOT NULL DEFAULT '',
+                role2_name        TEXT NOT NULL DEFAULT '',
+                role2_goal        TEXT NOT NULL DEFAULT '',
+                role3_name        TEXT NOT NULL DEFAULT '',
+                role3_goal        TEXT NOT NULL DEFAULT '',
+                role4_name        TEXT NOT NULL DEFAULT '',
+                role4_goal        TEXT NOT NULL DEFAULT '',
+                role5_name        TEXT NOT NULL DEFAULT '',
+                role5_goal        TEXT NOT NULL DEFAULT '',
+                updated_at        DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """))

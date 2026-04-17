@@ -7,11 +7,10 @@ import sys
 import tkinter as tk
 from dataclasses import dataclass, field
 from tkinter import ttk, messagebox
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 
 from models.database import init_db
 from models.note_model import NoteModel
-from models.compass_model import CompassModel
 from models.schedule_model import ScheduleModel
 from views.main_view import MainView
 
@@ -49,7 +48,6 @@ class AppController:
         # ── モデル初期化 ─────────────────────────────────────────────
         init_db()
         self._note_model = NoteModel()
-        self._compass_model = CompassModel()
         self._schedule_model = ScheduleModel()
 
         # ── アプリケーション状態 ──────────────────────────────────────
@@ -68,9 +66,6 @@ class AppController:
         note.bind_save(self._on_save_note)
         note.bind_focus_in(self._on_note_focus_in)
         note.bind_focus_out(self._on_note_focus_out)
-
-        compass = self._view.compass_view
-        compass.bind_save(self._on_save_compass)
 
         sched = self._view.schedule_view
         sched.bind_daily(self._on_toggle_mode)
@@ -94,7 +89,6 @@ class AppController:
         note.set_date(self._format_date(self._state.selected_date))
         self._on_toggle_mode("daily")
         self._load_note()
-        self._load_compass()
 
     # ── テーマカラー ─────────────────────────────────────────────────
 
@@ -166,7 +160,6 @@ class AppController:
         self._refresh_calendar()
         self._load_note()
         self._reload_schedule()
-        self._load_compass()
 
     # ── メモ操作 ──────────────────────────────────────────────────────
 
@@ -339,24 +332,6 @@ class AppController:
         btn_frame.pack()
         tk.Button(btn_frame, text="修正", command=on_edit).pack(side=tk.LEFT)
         tk.Button(btn_frame, text="削除", command=on_delete).pack(side=tk.LEFT)
-
-    def _week_start(self, d: date) -> date:
-        offset = (d.weekday() + 1) % 7
-        return d - timedelta(days=offset)
-    
-    def _load_compass(self) -> None:
-        ws = self._week_start(self._state.selected_date)
-        week_end = ws + timedelta(days=6)
-        self._view.compass_view.set_date_label(
-            f"{ws.strftime('%Y/%m/%d')} 〜 {week_end.strftime('%m/%d')}"
-        )
-        data = self._compass_model.load(str(ws))
-        self._view.compass_view.set_data(data)
-
-    def _on_save_compass(self) -> None:
-        ws = self._week_start(self._state.selected_date)
-        data = self._view.compass_view.get_data()
-        self._compass_model.save(str(ws), data)
 
     # ── ユーティリティ ───────────────────────────────────────────────
 
