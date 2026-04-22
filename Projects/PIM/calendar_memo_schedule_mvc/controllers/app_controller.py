@@ -7,12 +7,12 @@ import sys
 import tkinter as tk
 from dataclasses import dataclass, field
 from tkinter import ttk, messagebox
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 
 from models.database import init_db
 from models.note_model import NoteModel
-from models.compass_model import CompassModel
 from models.schedule_model import ScheduleModel
+from models.ui_settings_model import UiSettingsModel
 from views.main_view import MainView
 
 
@@ -49,8 +49,8 @@ class AppController:
         # ── モデル初期化 ─────────────────────────────────────────────
         init_db()
         self._note_model = NoteModel()
-        self._compass_model = CompassModel()
         self._schedule_model = ScheduleModel()
+        self._ui_settings_model = UiSettingsModel()
 
         # ── アプリケーション状態 ──────────────────────────────────────
         self._state = AppState()
@@ -58,6 +58,16 @@ class AppController:
         # ── View 構築 ────────────────────────────────────────────────
         colors = self._build_colors()
         self._view = MainView(root, colors)
+
+        # ── 保存済みレイアウトを復元 ──────────────────────────────────
+        # MainView.__init__ がデフォルト値でサッシを初期化した直後に
+        # DB の保存値で上書きする。after() の FIFO 順により保存値が必ず後に適用される。
+        self._view.apply_sash_positions(self._ui_settings_model.load())
+
+        # ── ウィンドウ終了ハンドラを登録 ─────────────────────────────
+        # × ルートウィンドウを直接破棄すると保存処理が走らないため
+        # root.protocol で終了をインターセプトして _on_close を呼ぶ。
+        root.protocol("WM_DELETE_WINDOW", self._on_close)
 
         # ── View へコールバックを登録 ────────────────────────────────
         cal = self._view.calendar_view
@@ -68,9 +78,6 @@ class AppController:
         note.bind_save(self._on_save_note)
         note.bind_focus_in(self._on_note_focus_in)
         note.bind_focus_out(self._on_note_focus_out)
-
-        compass = self._view.compass_view
-        compass.bind_save(self._on_save_compass)
 
         sched = self._view.schedule_view
         sched.bind_daily(self._on_toggle_mode)
@@ -94,7 +101,6 @@ class AppController:
         note.set_date(self._format_date(self._state.selected_date))
         self._on_toggle_mode("daily")
         self._load_note()
-        self._load_compass()
 
     # ── テーマカラー ─────────────────────────────────────────────────
 
@@ -166,7 +172,6 @@ class AppController:
         self._refresh_calendar()
         self._load_note()
         self._reload_schedule()
-        self._load_compass()
 
     # ── メモ操作 ──────────────────────────────────────────────────────
 
@@ -340,23 +345,12 @@ class AppController:
         tk.Button(btn_frame, text="修正", command=on_edit).pack(side=tk.LEFT)
         tk.Button(btn_frame, text="削除", command=on_delete).pack(side=tk.LEFT)
 
-    def _week_start(self, d: date) -> date:
-        offset = (d.weekday() + 1) % 7
-        return d - timedelta(days=offset)
-    
-    def _load_compass(self) -> None:
-        ws = self._week_start(self._state.selected_date)
-        week_end = ws + timedelta(days=6)
-        self._view.compass_view.set_date_label(
-            f"{ws.strftime('%Y/%m/%d')} 〜 {week_end.strftime('%m/%d')}"
-        )
-        data = self._compass_model.load(str(ws))
-        self._view.compass_view.set_data(data)
+    # ── レイアウト保存 ────────────────────────────────────────────────
 
-    def _on_save_compass(self) -> None:
-        ws = self._week_start(self._state.selected_date)
-        data = self._view.compass_view.get_data()
-        self._compass_model.save(str(ws), data)
+    def _on_close(self) -> None:
+        """ウィンドウ終了時にサッシ位置を保存してからアプリを終了する。"""
+        self._ui_settings_model.save(self._view.get_sash_positions())
+        self.root.destroy()
 
     # ── ユーティリティ ───────────────────────────────────────────────
 

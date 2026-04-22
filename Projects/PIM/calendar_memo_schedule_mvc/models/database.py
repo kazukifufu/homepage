@@ -53,3 +53,12 @@ def init_db() -> None:
                 updated_at        DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """))
+
+        # UI設定用テーブル（サッシ位置などウィンドウ状態を保存する）
+        conn.execute(textwrap.dedent("""\
+            CREATE TABLE IF NOT EXISTS ui_settings (
+                key        TEXT PRIMARY KEY,
+                value      TEXT NOT NULL,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
