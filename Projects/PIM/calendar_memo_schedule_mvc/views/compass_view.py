@@ -52,7 +52,7 @@ class CompassView:
 
         # ── 役割・目標 セクション (5セット) ──────────────────────────
         self._role_name_entries: list[tk.Entry] = []
-        self._goal_text_areas:   list[tk.Text]  = []
+        self._goal_text_areas: list[tk.Text] = []
         for i in range(1, 6):
             self._build_role_section(i)
 
