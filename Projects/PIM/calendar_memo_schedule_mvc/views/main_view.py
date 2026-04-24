@@ -69,8 +69,8 @@ class MainView:
         # Controller が保存値を持っている場合は __init__ 後に
         # apply_sash_positions() を再呼び出しして上書きする。
         default_positions = {
-            "sash_h0": int(WIN_WIDTH  * _LEFT_RATIO),
-            "sash_h1": int(WIN_WIDTH  * _CENTER_RATIO),
+            "sash_h0": int(WIN_WIDTH * _LEFT_RATIO),
+            "sash_h1": int(WIN_WIDTH * _CENTER_RATIO),
             "sash_v0": int(WIN_HEIGHT * _VERTICAL_RATIO),
         }
         self.apply_sash_positions(default_positions)

@@ -119,4 +119,3 @@ class CompassModel:
             },
             "roles": [{"name": "", "goal": ""} for _ in range(5)],
         }
-

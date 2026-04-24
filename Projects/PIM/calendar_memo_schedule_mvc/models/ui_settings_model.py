@@ -21,9 +21,9 @@ class UiSettingsModel:
     # 管理するキーとデフォルト値の対応
     # デフォルト値は main_view.py の初期比率と同一になるよう config 定数から算出する
     _DEFAULTS: dict[str, int] = {
-        "sash_h0": int(WIN_WIDTH  * _LEFT_RATIO),    # 左 / 中央境界
-        "sash_h1": int(WIN_WIDTH  * _CENTER_RATIO),  # 中央 / 右境界
-        "sash_v0": int(WIN_HEIGHT * _VERTICAL_RATIO), # カレンダー / メモ境界
+        "sash_h0": int(WIN_WIDTH * _LEFT_RATIO),    # 左 / 中央境界
+        "sash_h1": int(WIN_WIDTH * _CENTER_RATIO),  # 中央 / 右境界
+        "sash_v0": int(WIN_HEIGHT * _VERTICAL_RATIO),  # カレンダー / メモ境界
     }
 
     def load(self) -> dict[str, int]:
