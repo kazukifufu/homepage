@@ -16,6 +16,10 @@ _SHARPEN_FIELDS: tuple[tuple[str, str], ...] = (
 
 _QUESTION_TEXT = "今週この役割において、私にできる\n最も大切な事柄は、何だろう？"
 
+# 各入力欄の表示幅（文字数）。添付画像のフィールド幅の約 1/3 に相当する。
+# 表示幅を超えた内容は水平スクロールバーでスクロールして確認できる。
+_ENTRY_WIDTH: int = 25
+
 
 class CompassView:
     """一週間コンパスエリアのウィジェット管理を行うクラス。
@@ -193,17 +197,27 @@ class CompassView:
                 fg=self.colors["frame_fg"],
             ).pack(side=tk.LEFT)
 
+            # Entry をラップするフレーム（スクロールバーを縦に並べるため）
+            entry_frame = tk.Frame(row, bg=self.colors["frame_bg"])
+            # entry_frame.pack(side=tk.LEFT) *****
+            entry_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+            hsb = tk.Scrollbar(entry_frame, orient=tk.HORIZONTAL)
             entry = tk.Entry(
-                row,
+                entry_frame,
                 font=("Arial", 9),
+                width=_ENTRY_WIDTH,
                 bg=self.colors["button_bg"],
                 fg=self.colors["button_fg"],
                 insertbackground=self.colors["button_fg"],
                 relief=tk.FLAT,
                 highlightthickness=1,
                 highlightbackground=self.colors["button_fg"],
+                xscrollcommand=hsb.set,
             )
-            entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+            hsb.config(command=entry.xview)
+            entry.pack(side=tk.TOP, fill=tk.X)
+            hsb.pack(side=tk.BOTTOM, fill=tk.X)
             self._sharpen_entries[key] = entry
 
     def _build_role_section(self, index: int) -> None:
@@ -230,23 +244,32 @@ class CompassView:
             role_row,
             text=f"役割({index})",
             font=("Arial", 9),
-            width=8,
+            width=10,
             anchor="w",
             bg=self.colors["frame_bg"],
             fg=self.colors["frame_fg"],
         ).pack(side=tk.LEFT)
 
+        name_entry_frame = tk.Frame(role_row, bg=self.colors["frame_bg"])
+        # name_entry_frame.pack(side=tk.LEFT) *****
+        name_entry_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        name_hsb = tk.Scrollbar(name_entry_frame, orient=tk.HORIZONTAL)
         name_entry = tk.Entry(
-            role_row,
+            name_entry_frame,
             font=("Arial", 9),
+            width=_ENTRY_WIDTH,
             bg=self.colors["button_bg"],
             fg=self.colors["button_fg"],
             insertbackground=self.colors["button_fg"],
             relief=tk.FLAT,
             highlightthickness=1,
             highlightbackground=self.colors["button_fg"],
+            xscrollcommand=name_hsb.set,
         )
-        name_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        name_hsb.config(command=name_entry.xview)
+        name_entry.pack(side=tk.TOP, fill=tk.X)
+        name_hsb.pack(side=tk.BOTTOM, fill=tk.X)
         self._role_name_entries.append(name_entry)
 
         # 目標入力行（2行テキストエリア）
@@ -257,25 +280,36 @@ class CompassView:
             goal_row,
             text=f"目標({index})",
             font=("Arial", 9),
-            width=8,
+            width=10,
             anchor="nw",
             bg=self.colors["frame_bg"],
             fg=self.colors["frame_fg"],
         ).pack(side=tk.LEFT, anchor="n", pady=(2, 0))
 
+        goal_frame = tk.Frame(goal_row, bg=self.colors["frame_bg"])
+        # goal_frame.pack(side=tk.LEFT, anchor="n", pady=(2, 0)) *****
+        goal_frame.pack(side=tk.LEFT, anchor="n", pady=(2, 0), fill=tk.X, expand=True)
+
+        goal_hsb = tk.Scrollbar(goal_frame, orient=tk.HORIZONTAL)
         goal_area = tk.Text(
-            goal_row,
+            goal_frame,
             font=("Arial", 9),
+            width=_ENTRY_WIDTH,
             height=2,
             bg=self.colors["button_bg"],
             fg=self.colors["button_fg"],
             insertbackground=self.colors["button_fg"],
             relief=tk.FLAT,
+            bd=0,
             highlightthickness=1,
             highlightbackground=self.colors["button_fg"],
-            wrap=tk.WORD,
+            wrap=tk.NONE,
+            padx=0,
+            xscrollcommand=goal_hsb.set,
         )
-        goal_area.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        goal_hsb.config(command=goal_area.xview)
+        goal_area.pack(side=tk.TOP, fill=tk.X)
+        goal_hsb.pack(side=tk.BOTTOM, fill=tk.X)
         self._goal_text_areas.append(goal_area)
 
     # ── コールバック登録 ─────────────────────────────────────────────
